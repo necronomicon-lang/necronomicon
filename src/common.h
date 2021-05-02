@@ -9,4 +9,6 @@
 
 typedef uint8_t u8;
 
+#define DEBUG_TRACE_EXECUTION
+
 #endif
