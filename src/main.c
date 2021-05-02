@@ -5,10 +5,10 @@
 int main(int argc, const char* argv[])
 {
     Chunk chunk;
-    initChunk(&chunk);
-    writeChunk(&chunk, OP_RETURN);
+    init_chunk(&chunk);
+    write_chunk(&chunk, OP_RETURN);
 
-    disassembleChunk(&chunk, "test chunk");
-    freeChunk(&chunk);
+    disassemble_chunk(&chunk, "test chunk");
+    free_chunk(&chunk);
     return 0;
 }

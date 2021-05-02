@@ -2,23 +2,23 @@
 
 #include "debug.h"
 
-void disassembleChunk(Chunk* chunk, const char* name)
+void disassemble_chunk(Chunk* chunk, const char* name)
 {
     printf("== %s ==\n", name);
 
     for (int offset = 0; offset < chunk->count;)
     {
-        offset = disassembleInstruction(chunk, offset);
+        offset = disassemble_instruction(chunk, offset);
     }
 }
 
-internal int simpleInstruction(const char* name, int offset)
+internal int simple_instruction(const char* name, int offset)
 {
     printf("%s\n", name);
     return offset + 1;
 }
 
-int disassembleInstruction(Chunk* chunk, int offset)
+int disassemble_instruction(Chunk* chunk, int offset)
 {
     printf("%04d ", offset);
 
@@ -27,7 +27,7 @@ int disassembleInstruction(Chunk* chunk, int offset)
     {
         case OP_RETURN:
         {
-            return simpleInstruction("OP_RETURN", offset);
+            return simple_instruction("OP_RETURN", offset);
         } break;
         default:
         {

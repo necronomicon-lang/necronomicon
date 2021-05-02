@@ -3,20 +3,20 @@
 #include "chunk.h"
 #include "memory.h"
 
-void initChunk(Chunk* chunk)
+void init_chunk(Chunk* chunk)
 {
     chunk->count = 0;
     chunk->capacity = 0;
     chunk->code = NULL;
 }
 
-void freeChunk(Chunk *chunk)
+void free_chunk(Chunk *chunk)
 {
     FREE_ARRAY(u8, chunk->code, chunk->capacity);
-    initChunk(chunk);
+    init_chunk(chunk);
 }
 
-void writeChunk(Chunk *chunk, u8 byte)
+void write_chunk(Chunk *chunk, u8 byte)
 {
     if (chunk->capacity < chunk->count + 1) {
         int oldCapacity = chunk->capacity;

@@ -15,8 +15,8 @@ typedef struct
     u8* code;
 } Chunk;
 
-void initChunk(Chunk *chunk);
-void freeChunk(Chunk *chunk);
-void writeChunk(Chunk *chunk, u8 byte);
+void init_chunk(Chunk *chunk);
+void free_chunk(Chunk *chunk);
+void write_chunk(Chunk *chunk, u8 byte);
 
 #endif
