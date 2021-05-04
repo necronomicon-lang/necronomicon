@@ -6,6 +6,7 @@
 			"label": "C/C++: gcc build active file",
 			"command": "gcc",
 			"args": [
+				"-g",
 				"-o",
 				"${workspaceFolder}/bin/necronomicon.exe",
 				"src/*.c"
