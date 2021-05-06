@@ -9,7 +9,9 @@
 
 typedef uint8_t u8;
 
+#define DEBUG_PRINT_CODE
 #define DEBUG_TRACE_EXECUTION
+
 #define loop for (;;)
 
 #endif

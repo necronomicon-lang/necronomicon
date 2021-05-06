@@ -155,7 +155,7 @@ internal void skip_whitespace()
                 }
                 break;
             default:
-                break;
+                return;
         }
     }
 }
