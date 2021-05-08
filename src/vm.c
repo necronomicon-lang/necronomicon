@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdarg.h>
 #include "common.h"
 #include "compiler.h"
 #include "debug.h"
@@ -8,6 +9,21 @@ VM vm;
 
 internal void reset_stack() {
     vm.stack_top = vm.stack;
+}
+
+internal void runtime_error(const char* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    vsprintf(stderr, format, args);
+    va_end(args);
+
+    fputs("\n", stderr);
+
+    size_t instruction = vm.ip - vm.chunk->code - 1;
+    int line = vm.chunk->lines[instruction];
+    fprintf(stderr, "[line %d] in script\n", line);
+    reset_stack();
 }
 
 void init_vm()
@@ -20,16 +36,31 @@ void free_vm()
 
 }
 
+internal Value peek(int distance)
+{
+    return vm.stack_top[-1 - distance];
+}
+
+internal bool is_falsey(Value value)
+{
+    return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
+}
 internal InterpretResult run()
 {
     #define READ_BYTE() (*vm.ip++)
     #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
-    #define BINARY_OP(op) \
-        do { \
-            double b = pop(); \
-            double a = pop(); \
-            push(a op b); \
-        } while (false)
+    #define BINARY_OP(value_type, op) \
+        do \
+        { \
+            if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) \
+            { \
+                runtime_error("Operands must be numbers."); \
+            } \
+            double b = AS_NUMBER(pop()); \
+            double a = AS_NUMBER(pop()); \
+            push(value_type(a op b)); \
+        } \
+        while (false)
 
     for (;;)
     {
@@ -55,29 +86,36 @@ internal InterpretResult run()
                 push(constant);
             } break;
 
-            case OP_ADD:
-            {
-                BINARY_OP(+);
-            } break;
+            case OP_NIL: push(NIL_VAL); break;
+            case OP_TRUE: push(BOOL_VAL(true)); break;
+            case OP_FALSE: push(BOOL_VAL(false)); break;
 
-            case OP_SUBTRACT:
+            case OP_EQUAL:
             {
-                BINARY_OP(-);
-            } break;
+                Value rhs = pop();
+                Value lhs = pop();
+                push(BOOL_VAL(values_equal(lhs, rhs)));
+                break;
+            }
 
-            case OP_MULTIPLY:
-            {
-                BINARY_OP(*);
-            } break;
+            case OP_GREATER: BINARY_OP(BOOL_VAL, >); break;
+            case OP_LESS: BINARY_OP(BOOL_VAL, <); break;
+            case OP_ADD: BINARY_OP(NUMBER_VAL, +); break;
+            case OP_SUBTRACT: BINARY_OP(NUMBER_VAL, -); break;
+            case OP_MULTIPLY: BINARY_OP(NUMBER_VAL, *); break;
+            case OP_DIVIDE: BINARY_OP(NUMBER_VAL, /); break;
 
-            case OP_DIVIDE:
-            {
-                BINARY_OP(/);
-            } break;
+            case OP_NOT: push(BOOL_VAL(is_falsey(pop()))); break;
 
             case OP_NEGATE:
             {
-                push(-pop());
+                if (!IS_NUMBER(peek(0)))
+                {
+                    runtime_error("Operand must be a number.");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                push(NUMBER_VAL(-AS_NUMBER(pop())));
+                break;
             } break;
 
             case OP_RETURN:
